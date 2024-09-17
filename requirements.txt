@@ -1,1 +1,6 @@
-# python
+streamlit==1.38.0
+pandas==2.0.3
+plotly==5.24.0
+plotly-express==0.4.1
+numpy==1.24.4
+tqdm==4.66.5

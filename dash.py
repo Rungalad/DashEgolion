@@ -98,9 +98,9 @@ def get_ui(cols, dataset, categorical_vals, float_vals):
     if len(dataset) == 0:
         st.write(":red[Исковых предложений нет!]")
         return dict()
-    geo_data = dataset[['location_latitude', 'location_longitude', 'location_address']]
+    geo_data = dataset[['location_latitude', 'location_longitude', 'building-name']] # location_address building-name
     geo_data['to_count'] = 1
-    geo_data = geo_data.groupby(['location_latitude', 'location_longitude', 'location_address'], as_index=False).sum()
+    geo_data = geo_data.groupby(['location_latitude', 'location_longitude', 'building-name'], as_index=False).sum() # location_address building-name
     print("Dataset shape after: ", dataset.shape)
     
     opts = dict()
@@ -166,15 +166,9 @@ def get_ui(cols, dataset, categorical_vals, float_vals):
         if distMetro is not None:
             if len(distMetro) > 0:
                 opts.update({'location_metro_time-on-foot': metro_dist[distMetro]})
-    #with cols_house_fl1[3]:
-    #    distMetroCar = st.selectbox(
-    #                f"Выберите :green[Время в пути до метро, на машине]:",
-    #                options=metro_dist,
-    #                index=None,
-    #                placeholder="Выберите опцию")
-    #    if distMetroCar is not None:
-    #        if len(distMetroCar) > 0:
-    #            opts.update({'location_metro_time-on-transport': metro_dist[distMetroCar]})
+                
+    # Время в пути до метро, на машине
+
     
     ################################# Параметры дома #################################
     st.subheader(":rainbow[Параметры дома]")
@@ -196,7 +190,7 @@ def get_ui(cols, dataset, categorical_vals, float_vals):
     ################################# Геолокация #################################
     st.subheader(":rainbow[Геолокация]")
     # dropped 'location_sub-locality-name'
-    cat_cols_geo = ['location_region', 'location_locality-name', 'location_non-admin-sub-locality', 'location_address', 'location_metro_name']
+    cat_cols_geo = ['location_region', 'location_locality-name', 'location_non-admin-sub-locality', 'location_address', 'location_metro_name', 'building-name']
     cols_geo = st.columns([0.3, 0.7], gap='small') # len(cat_cols_geo)
     cnt = 0
     for key in cat_cols_geo:
@@ -219,6 +213,7 @@ def get_ui(cols, dataset, categorical_vals, float_vals):
     else:
         geo_data["color"] = None
     geo_data.rename(columns={"to_count": "кол-во предложений"}, inplace=True)  
+    print(geo_data.head())
    
     with cols_geo[cnt]:
         fig = px.scatter_mapbox(
@@ -226,19 +221,26 @@ def get_ui(cols, dataset, categorical_vals, float_vals):
             lat="location_latitude",
             lon="location_longitude",
             color="color",
-            color_continuous_scale = "rdgy", # viridis rdgy
+            color_continuous_scale = "jet", # viridis rdgy electric emrld jet hsv
             size="кол-во предложений",
             size_max=15,
             zoom=10,
-            mapbox_style="carto-positron", # carto-darkmatter carto-positron open-street-map
-            text=geo_data["location_address"].astype(str),  # this is the text for labels
-            height=700
+            mapbox_style="open-street-map", # carto-darkmatter carto-positron open-street-map
+            text=geo_data["building-name"].astype(str),  # this is the text for labels - building-name location_address
+            height=700,
+            labels={'labels': 'building-name'} # , 'color': 'rgb(100, 100 ,100)' building-name location_address
+        )
+        fig.update_layout(
+            font_family="Courier New",
+            font_color="rgb(50,50,50)",
         )
         geo_vals = st.plotly_chart(fig, use_container_width=True, on_select="rerun", selection_mode=["points", "box", "lasso"])
         geo_vals_list = [i["text"] for i in geo_vals["selection"]["points"]]
         if len(geo_vals_list) > 0:
-            opts.update({"location_address": geo_vals_list})
+            opts.update({"building-name": geo_vals_list}) # building-name location_address
 
+    ################################# Прочее #################################
+    
     # отрисовка набора данных
     st.subheader(f":rainbow[Предложения] - {dataset.shape[0]}")    
     if "Unnamed: 0" in dataset.columns.to_list():

@@ -116,7 +116,7 @@ def get_ui(cols, dataset, categorical_vals, float_vals):
 
     ################################# Параметры квартиры #################################
     st.subheader(":rainbow[Параметры квартиры]")
-    cat_cols_house = ['renovation', 'balcony', 'bathroom-unit', 'floor', 'rooms']
+    cat_cols_house = ['floor', 'rooms'] # 'renovation', 'balcony', 'bathroom-unit', 
     cols_house = st.columns(len(cat_cols_house), gap='large')
     cnt = 0
     for key in cat_cols_house:
@@ -172,7 +172,7 @@ def get_ui(cols, dataset, categorical_vals, float_vals):
     
     ################################# Параметры дома #################################
     st.subheader(":rainbow[Параметры дома]")
-    cat_cols_build = ['floors-total', 'built-year', 'ready-quarter', 'lift', 'parking', 'building-type']
+    cat_cols_build = ['built-year', 'ready-quarter']
     cols_house = st.columns(len(cat_cols_build), gap='large')
     cnt = 0
     for key in cat_cols_build:
@@ -240,6 +240,35 @@ def get_ui(cols, dataset, categorical_vals, float_vals):
             opts.update({"building-name": geo_vals_list}) # building-name location_address
 
     ################################# Прочее #################################
+    st.subheader(":rainbow[Прочие параметры квартиры и дома]")
+    cat_cols_other = ['renovation', 'balcony', 'bathroom-unit']
+    cols_house = st.columns(len(cat_cols_other), gap='large')
+    cnt = 0
+    for key in cat_cols_other:
+        ln = len(new_di_vals[key])
+        chosen_vals = [val for val in st.session_state[key] if val in new_di_vals[key]]
+        with cols_house[cnt]:
+            options = st.multiselect(
+                f"Выберите :green[{cols[key]}] :gray[(осталось вариантов {ln})]:",
+                new_di_vals[key],
+                chosen_vals,
+                placeholder="Выберите опцию")
+        opts.update({key: set(options)})
+        cnt = cnt + 1  
+    cat_cols_build_other = ['floors-total', 'lift', 'parking', 'building-type']
+    cols_house = st.columns(len(cat_cols_build_other), gap='large')
+    cnt = 0
+    for key in cat_cols_build_other:
+        ln = len(new_di_vals[key])
+        chosen_vals = [val for val in st.session_state[key] if val in new_di_vals[key]]
+        with cols_house[cnt]:
+            options = st.multiselect(
+                f"Выберите :green[{cols[key]}] :gray[(осталось вариантов {ln})]:",
+                new_di_vals[key],
+                chosen_vals,
+                placeholder="Выберите опцию")
+        opts.update({key: set(options)})
+        cnt = cnt + 1
     
     # отрисовка набора данных
     st.subheader(f":rainbow[Предложения] - {dataset.shape[0]}")    
